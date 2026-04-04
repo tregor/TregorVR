@@ -1,0 +1,8 @@
+﻿# Тяжёлые деревья: не индексировать в Cursor (поиск, AI context)
+kalibr_catkin/kalibr-upstream/
+kalibr_catkin/build/
+kalibr_catkin/devel/
+kalibr_catkin/install/
+build/
+**/.venv/
+**/node_modules/

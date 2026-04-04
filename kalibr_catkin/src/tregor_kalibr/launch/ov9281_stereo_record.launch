@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+  Стерео OV9281 — камеры + превью. Запись bag: ./kalibr_pipeline.sh record (второй терминал).
+
+  MJPEG 800×600@20 по умолчанию (стабильный USB). YUYV: pixel_format:=yuyv (тяжёлее для usbip).
+
+  Перед usb_cam вызывается lock_uvc.sh (v4l2-ctl): ручная экспозиция, АББ выкл, фикс. gain/WB.
+  Подбор яркости: uvc_exposure:=200 (1–10000), uvc_gain:=120, uvc_wb_temp:=4600
+  Отключить лок: uvc_lock:=false (без v4l2, обычный usb_cam).
+
+  cam0 = левая, cam1 = правая. По умолчанию: /dev/video2 → cam0, /dev/video0 → cam1.
+-->
+<launch>
+  <arg name="debug_dir" default="$(env HOME)/kalibr_debug"/>
+  <arg name="width" default="800"/>
+  <arg name="height" default="600"/>
+  <arg name="fps" default="20"/>
+  <arg name="pixel_format" default="mjpeg"/>
+  <arg name="device0" default="/dev/video2"/>
+  <arg name="device1" default="/dev/video0"/>
+  <arg name="io_method" default="mmap"/>
+  <arg name="uvc_lock" default="true"/>
+  <arg name="uvc_exposure" default="156"/>
+  <arg name="uvc_gain" default="100"/>
+  <arg name="uvc_wb_temp" default="4600"/>
+
+  <group if="$(arg uvc_lock)">
+    <node name="cam0" pkg="tregor_kalibr" type="run_usb_cam0_locked.sh" output="screen" required="true" args="$(arg device0)">
+      <env name="UVC_EXPOSURE_ABS" value="$(arg uvc_exposure)"/>
+      <env name="UVC_GAIN" value="$(arg uvc_gain)"/>
+      <env name="UVC_WB_TEMP" value="$(arg uvc_wb_temp)"/>
+      <param name="video_device" value="$(arg device0)"/>
+      <param name="image_width" value="$(arg width)"/>
+      <param name="image_height" value="$(arg height)"/>
+      <param name="pixel_format" value="$(arg pixel_format)"/>
+      <param name="camera_frame_id" value="cam0"/>
+      <param name="framerate" value="$(arg fps)"/>
+      <param name="io_method" value="$(arg io_method)"/>
+    </node>
+    <node name="cam1" pkg="tregor_kalibr" type="run_usb_cam_delayed.sh" output="screen" required="true" args="5 $(arg device1)">
+      <env name="UVC_EXPOSURE_ABS" value="$(arg uvc_exposure)"/>
+      <env name="UVC_GAIN" value="$(arg uvc_gain)"/>
+      <env name="UVC_WB_TEMP" value="$(arg uvc_wb_temp)"/>
+      <param name="video_device" value="$(arg device1)"/>
+      <param name="image_width" value="$(arg width)"/>
+      <param name="image_height" value="$(arg height)"/>
+      <param name="pixel_format" value="$(arg pixel_format)"/>
+      <param name="camera_frame_id" value="cam1"/>
+      <param name="framerate" value="$(arg fps)"/>
+      <param name="io_method" value="$(arg io_method)"/>
+    </node>
+  </group>
+  <group unless="$(arg uvc_lock)">
+    <node name="cam0" pkg="usb_cam" type="usb_cam_node" output="screen" required="true">
+      <param name="video_device" value="$(arg device0)"/>
+      <param name="image_width" value="$(arg width)"/>
+      <param name="image_height" value="$(arg height)"/>
+      <param name="pixel_format" value="$(arg pixel_format)"/>
+      <param name="camera_frame_id" value="cam0"/>
+      <param name="framerate" value="$(arg fps)"/>
+      <param name="io_method" value="$(arg io_method)"/>
+    </node>
+    <node name="cam1" pkg="tregor_kalibr" type="run_usb_cam_delayed.sh" output="screen" required="true" args="5 $(arg device1)">
+      <env name="UVC_SKIP_LOCK" value="1"/>
+      <param name="video_device" value="$(arg device1)"/>
+      <param name="image_width" value="$(arg width)"/>
+      <param name="image_height" value="$(arg height)"/>
+      <param name="pixel_format" value="$(arg pixel_format)"/>
+      <param name="camera_frame_id" value="cam1"/>
+      <param name="framerate" value="$(arg fps)"/>
+      <param name="io_method" value="$(arg io_method)"/>
+    </node>
+  </group>
+
+  <node name="kalibr_preview_saver" pkg="tregor_kalibr" type="preview_saver.py" output="screen">
+    <param name="debug_dir" value="$(arg debug_dir)"/>
+  </node>
+</launch>

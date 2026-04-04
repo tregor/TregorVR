@@ -1,0 +1,6 @@
+# Checkerboard: 6×7 inner corners (width × height); квадрат 75 mm × 75 mm (0.075 m).
+target_type: 'checkerboard'
+targetCols: 6
+targetRows: 7
+rowSpacingMeters: 0.075
+colSpacingMeters: 0.075

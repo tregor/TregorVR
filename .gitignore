@@ -1,0 +1,136 @@
+# TregorVR — .gitignore
+# Уже в индексе: git rm -r --cached <путь> (файлы на диске остаются)
+#
+# Согласовано с STEREO_VISION_PIPELINE.md / tools/orb_slam3/README.md:
+# не игнорируются kalibr_data/*.{yaml,txt}, kalibr_catkin (кроме kalibr-upstream и сборки),
+# tools/** (кроме .venv и кэшей), *.md в корне. secrets.y*ml — только secrets.yml / secrets.yaml.
+
+# --- Вендор (апстрим подтягивается kalibr_pipeline.sh build-docker) ---
+kalibr_catkin/kalibr-upstream/
+/third_party/
+/vendor/
+
+# --- Сборка: CMake, Catkin, корень репо ---
+build/
+cmake-build-*/
+out/
+compile_commands.json
+devel/
+install/
+logs/
+.catkin_workspace
+
+# --- MSVC / локальные конфиги студии ---
+.vs/
+x64/
+x86/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# --- Бинарники и объектники (если не в build/) ---
+*.[oa]
+*.obj
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+*.out
+*.app
+
+# --- ROS bag ---
+*.bag
+*.bag.active
+*.bag.orig
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg
+*.egg-info/
+.eggs/
+dist/
+wheels/
+pip-log.txt
+pip-delete-this-directory.txt
+*.manifest
+*.spec
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+nosetests.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.cache/
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+.ipynb_checkpoints/
+
+# --- IDE ---
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# --- ОС ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.directory
+
+# --- Секреты ---
+.env
+.env.*
+!.env.example
+*.pem
+secrets.y*ml
+
+# --- Данные Kalibr рядом с репо ---
+/kalibr_debug/
+/kalibr_out/
+
+# --- Прочее ---
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+~$*
+*.log
