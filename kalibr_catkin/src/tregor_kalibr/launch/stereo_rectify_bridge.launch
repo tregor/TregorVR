@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+  Вариант B: ректификация как у ORB live → /stereo/left|right/{image_rect,camera_info}.
+  Путь к YAML по умолчанию от корня catkin ws (…/kalibr_catkin/src/tregor_kalibr → ../../../kalibr_data).
+  Свой путь: rectify_yaml:=/abs/path/to/*-orbslam3-rectify-input.yaml
+-->
+<launch>
+  <arg name="rectify_yaml" default="$(find tregor_kalibr)/../../../kalibr_data/my_calib_75mm-orbslam3-rectify-input.yaml"/>
+  <arg name="start_cameras" default="true"/>
+
+  <group if="$(arg start_cameras)">
+    <include file="$(find tregor_kalibr)/launch/ov9281_stereo_record.launch"/>
+  </group>
+
+  <node pkg="tregor_kalibr" type="stereo_rectify_rtabmap_bridge.py" name="stereo_rectify_rtabmap_bridge" output="screen">
+    <param name="rectify_yaml" value="$(arg rectify_yaml)"/>
+    <param name="left_topic" value="/cam0/image_raw"/>
+    <param name="right_topic" value="/cam1/image_raw"/>
+  </node>
+</launch>

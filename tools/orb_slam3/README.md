@@ -26,6 +26,8 @@
 
 `run_live_wsl.sh` по умолчанию передаёт **`ORB_LIVE_LEFT=2`**, **`ORB_LIVE_RIGHT=0`** и **не** читает `DEVICE_LEFT`/`DEVICE_RIGHT` (в сессии WSL часто остаётся ошибочный `export DEVICE_RIGHT=/dev/video1`). Свои устройства: `export ORB_LIVE_LEFT=... ORB_LIVE_RIGHT=...`.
 
+После **смены USB-хаба** нумерация портов часто меняется: если карта инициализируется и сразу сыпется **Fail to track local map**, сначала поменяйте линзы: **`ORB_LIVE_SWAP=1`** или **`ORB_LIVE_LEFT=0 ORB_LIVE_RIGHT=2`**. Тот же обмен нужен в **`uvc_ov9281_modes.sh`** (`UVC_LEFT` / `UVC_RIGHT`), если им пользуетесь.
+
 Типичный запуск в WSL:
 
 ```bash

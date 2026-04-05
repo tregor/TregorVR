@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.0.2)
 project(tregor_kalibr)
 find_package(catkin REQUIRED COMPONENTS rospy sensor_msgs cv_bridge)
 catkin_package()
-catkin_install_python(PROGRAMS scripts/preview_saver.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+catkin_install_python(PROGRAMS
+  scripts/preview_saver.py
+  scripts/stereo_rectify_rtabmap_bridge.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
 install(PROGRAMS
   scripts/lock_uvc.sh
   scripts/run_usb_cam0_locked.sh

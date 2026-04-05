@@ -3,12 +3,23 @@
 #
 # Согласовано с STEREO_VISION_PIPELINE.md / tools/orb_slam3/README.md:
 # не игнорируются kalibr_data/*.{yaml,txt}, kalibr_catkin (кроме kalibr-upstream и сборки),
-# tools/** (кроме .venv и кэшей), *.md в корне. secrets.y*ml — только secrets.yml / secrets.yaml.
+# tools/orb_slam3 (скрипты, CMake, .py), *.md в корне. secrets.y*ml — только secrets.yml / secrets.yaml.
+#
+# Windows ORB-SLAM3: в репозитории — только tools/orb_slam3/*; vcpkg и клон ORB-SLAM3 — в tools/vendor/
+# (не в git). Восстановление: bootstrap vcpkg, клон ORB_SLAM3 + патчи из истории/бэкапа, затем
+# tools/orb_slam3/build_windows.ps1. Словарь ORBvoc.txt — локально из Vocabulary/ORBvoc.txt.tar.gz.
 
 # --- Вендор (апстрим подтягивается kalibr_pipeline.sh build-docker) ---
 kalibr_catkin/kalibr-upstream/
 /third_party/
 /vendor/
+
+# --- tools/vendor: vcpkg, ORB_SLAM3 и прочие тяжёлые клоны (не коммитим) ---
+tools/vendor/
+
+# --- Сборка live runner (MSVC / CMake), manifest-Pangolin рядом с проектом ---
+tools/orb_slam3/build_win/
+tools/orb_slam3/vcpkg_installed/
 
 # --- Сборка: CMake, Catkin, корень репо ---
 build/

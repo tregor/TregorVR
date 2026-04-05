@@ -14,6 +14,16 @@ BUILD_DIR="${BUILD_DIR:-$ROOT/build/orb_slam3_live}"
 # Переопределение: ORB_LIVE_LEFT / ORB_LIVE_RIGHT (число или путь /dev/videoN).
 ORB_LIVE_LEFT="${ORB_LIVE_LEFT:-2}"
 ORB_LIVE_RIGHT="${ORB_LIVE_RIGHT:-0}"
+# Смена USB-хаба / порта часто меняет, какой /dev/video* — «левый» в смысле Kalibr cam0.
+# Если сразу после инициализации сыпется «Fail to track local map» — поменяйте линзы:
+#   ORB_LIVE_SWAP=1 bash .../run_live_wsl.sh
+# или явно: ORB_LIVE_LEFT=0 ORB_LIVE_RIGHT=2 (и наоборот).
+ORB_LIVE_SWAP="${ORB_LIVE_SWAP:-0}"
+if [[ "$ORB_LIVE_SWAP" == "1" ]]; then
+  _orb_swap_tmp="$ORB_LIVE_LEFT"
+  ORB_LIVE_LEFT="$ORB_LIVE_RIGHT"
+  ORB_LIVE_RIGHT="$_orb_swap_tmp"
+fi
 # Разрешение как в Kalibr camchain (800x600). Макс. MJPEG на OV9281 (перед запуском):
 #   bash tools/orb_slam3/uvc_ov9281_modes.sh max-slam
 #   CAPTURE_W=1280 CAPTURE_H=800 WIDTH=1280 HEIGHT=800 FPS=120 bash .../run_live_wsl.sh
@@ -33,6 +43,9 @@ ORB_LIVE_UVC_AUTO="${ORB_LIVE_UVC_AUTO:-0}"
 : "${ORB_SLAM3_VOCAB:?Set ORB_SLAM3_VOCAB to ORBvoc.txt}"
 
 echo "Stereo: left=$ORB_LIVE_LEFT right=$ORB_LIVE_RIGHT (ORB_LIVE_LEFT/RIGHT)"
+if [[ "${ORB_LIVE_SWAP:-0}" == "1" ]]; then
+  echo "  ORB_LIVE_SWAP=1: левая/правая линза обменяны местами для этого запуска."
+fi
 
 EXPORT_EXTRA=()
 if [[ -n "${CAPTURE_W:-}" && -n "${CAPTURE_H:-}" ]]; then

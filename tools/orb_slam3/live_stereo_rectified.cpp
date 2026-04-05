@@ -175,13 +175,26 @@ Args ParseArgs(int argc, char **argv) {
 
 cv::VideoCapture OpenCapture(const std::string &device) {
     if (IsNumber(device)) {
-        return cv::VideoCapture(ParseInt("device index", device));
+        const int index = ParseInt("device index", device);
+#ifdef _WIN32
+        cv::VideoCapture cap(index, cv::CAP_MSMF);
+        if (cap.isOpened()) {
+            return cap;
+        }
+        return cv::VideoCapture(index);
+#else
+        return cv::VideoCapture(index);
+#endif
     }
+#ifdef _WIN32
+    return cv::VideoCapture(device);
+#else
     cv::VideoCapture cap(device, cv::CAP_V4L2);
     if (cap.isOpened()) {
         return cap;
     }
     return cv::VideoCapture(device);
+#endif
 }
 
 void ConfigureCapture(cv::VideoCapture &cap, int width, int height, int fps, const std::string &fourcc) {

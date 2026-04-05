@@ -41,6 +41,59 @@
 
 При смене разрешения или камеры: заново **record + calibrate**, затем снова **`run_live_wsl.sh`** (или только `export_orbslam3_config.py` с тем же camchain, если разрешение совпадает).
 
+## RTAB-Map (вариант B — уже ректифицированное стерео)
+
+Тот же пайплин ректификации, что у **ORB live** (`*-orbslam3-rectify-input.yaml`, `fisheye::stereoRectify` / `stereoRectify`), публикуется в ROS для **RTAB-Map**:
+
+| Топик | Содержимое |
+|--------|------------|
+| `/stereo/left/image_rect`, `/stereo/right/image_rect` | `mono8` (по умолчанию) |
+| `/stereo/left/camera_info`, `/stereo/right/camera_info` | `P` из OpenCV, **D = 0**, **R = I** (как для готовых ректифицированных кадров) |
+
+Узел: **`stereo_rectify_rtabmap_bridge.py`** (`tregor_kalibr`). Статический TF **левый → правый** оптический кадр: сдвиг **`+baseline_m`** по оси X (можно выключить `~publish_tf:=false`).
+
+**Запуск только моста** (камеры + ректификация):
+
+```bash
+source /opt/ros/noetic/setup.bash
+source ~/…/kalibr_catkin/devel/setup.bash
+roslaunch tregor_kalibr stereo_rectify_bridge.launch
+```
+
+Опции: `start_cameras:=false` если `usb_cam` уже крутится; **`rectify_yaml:=/полный/путь/...-rectify-input.yaml`** если `$(find tregor_kalibr)/../../../kalibr_data/...` не находится (другой layout ws).
+
+**Вместе с RTAB-Map** (нужен `sudo apt install ros-noetic-rtabmap-ros`):
+
+```bash
+cd /path/to/TregorVR\ 3.0/kalibr_catkin
+source ./source_ws.bash
+roslaunch tregor_kalibr rtabmap_ov9281_rectified.launch
+```
+
+**Если `roslaunch` пишет, что launch не в пакете:** вы не подключили воркспейс. Сделайте **`source ./source_ws.bash`** из **`kalibr_catkin`** (скрипт добавляет **`src`** в **`ROS_PACKAGE_PATH`** и при наличии — **`devel/setup.bash`**).
+
+**Узлы Python** (`stereo_rectify_rtabmap_bridge.py` и т.д.) попадают в `PATH` только после **`catkin_make`** (появится **`devel/`**). Полный цикл один раз:
+
+```bash
+sudo apt install ros-noetic-catkin
+source /opt/ros/noetic/setup.bash
+cd "/path/to/TregorVR 3.0/kalibr_catkin"
+catkin_make
+source ./source_ws.bash
+```
+
+**Сборка catkin:** не ставьте пакет apt **`catkin`** (конфликт с **`python3-catkin-pkg`**). Для Noetic: **`sudo apt install ros-noetic-catkin`**, затем **`source /opt/ros/noetic/setup.bash`** — появится **`catkin_make`**.
+
+**Запуск launch по абсолютному пути** (если пакет всё ещё не виден):
+
+```bash
+roslaunch /mnt/e/Developer/TregorVR\ 3.0/kalibr_catkin/src/tregor_kalibr/launch/rtabmap_ov9281_rectified.launch
+```
+
+Если версия `rtabmap_ros` ожидает другие имена топиков — смотрите подписки `rosnode info /rtabmap` и поправьте `<remap>` в **`rtabmap_ov9281_rectified.launch`** или запускайте только **`stereo_rectify_bridge.launch`** и стартуйте `rtabmap` вручную.
+
+После смены калибровки снова сгенерируйте **`export_orbslam3_config.py`** (или скопируйте новый `*-orbslam3-rectify-input.yaml`) и укажите его в **`rectify_yaml`**.
+
 ## Версионирование (Git)
 
 Ориентир для `.gitignore`: **в индексе держим** `kalibr_data/` (в т.ч. `*.yaml`, `*-results-cam.txt`), `kalibr_catkin/` за исключением клона **`kalibr-upstream/`** и каталогов сборки Catkin (`build/`, `devel/`, `install/`, `logs/`), исходники **`tools/`**, `main.md`, этот файл. **Не коммитим** апстрим Kalibr (подтягивается `kalibr_pipeline.sh build-docker`), бинарные артефакты сборки, **`*.bag`**, локальные выгрузки **`kalibr_debug/`** и **`kalibr_out/`** в корне репозитория, виртуальные окружения (`.venv/` и т.п.). Подробности и снятие с индекса уже отслеживаемых путей — в шапке **`.gitignore`**.
